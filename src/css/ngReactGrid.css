@@ -1,22 +1,22 @@
 .ngReactGrid {
-    font-size: 12px;
-    font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", "Droid Arabic Kufi","Droid Sans";
     padding: 5px;
+    font-size: 9pt;
 }
 
 .ngReactGrid table {
     position: relative;
     table-layout: fixed;
-    background-color: #FFF;
     margin: 0;
     padding: 0;
     color: #555555;
     display: table;
-    border: 1px solid #CCC;
     border-spacing: 0;
     width: 100%;
 }
-
+.ngReactGridBody {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
 .ngReactGrid .ngReactGridViewPort {
     overflow-y: scroll;
     overflow-x: scroll;
@@ -26,7 +26,9 @@
     overflow-x: hidden;
     position: relative;
     overflow-y: hidden;
-    height: 27px;
+    /* height: 27px; */
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
 }
 
 .ngReactGrid .ngGridHeaderCellText {
@@ -52,8 +54,15 @@
 }
 
 .ngReactGrid .ngReactGridShowPerPage {
-    float: left;
-    width: 50%;
+    width: 33%;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.ngReactGrid .ngReactGridShowPerPage select {
+    background: none;
+    border: none;
 }
 
 .ngReactGrid .ngReactGridSearch {
@@ -65,7 +74,6 @@
 .ngReactGrid .ngReactGridSearch input {
     width: 50%;
     border-radius: 15px;
-    border: 1px solid #CCC;
     padding: 5px;
     padding-left: 9px;
     outline: none;
@@ -100,22 +108,15 @@
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     box-sizing: border-box;
-    -webkit-transition: all .1s ease-out;
-    -moz-transition: all .1s ease-out;
-    transition: all .1s ease-out;
 }
 
 .ngReactGrid table td, .ngReactGrid table th {
-    border-left: 1px solid #CCC;
     vertical-align: top;
 }
 
 .ngReactGrid table th {
     cursor: auto;
     text-align: left;
-    color: rgba(0,0,0,.8);
-    padding: 0px;
-    padding: 5px;
     display: table-cell;
 }
 
@@ -134,34 +135,28 @@
     word-wrap: break-word;
 }
 
-.ngReactGrid table tr:nth-child(odd) td {
-    background: #f5f5f5;
+.ngReactGrid table tr:first-child td {
+    border-top: 0px;
 }
 
 .ngReactGrid table tr:last-child td {
-    border-bottom: 1px solid #CCC;
+    border-bottom: 0px;
 }
 
-.ngReactGrid table tr td:first-child, .ngReactGrid table tr th:first-child {
-    border-left: none;
+.ngReactGrid table tr td:first-child,
+.ngReactGrid table tr th:first-child {
+    border-left: 0px;
 }
-
-.ngReactGrid .ngReactGridFooter, .ngReactGrid table th, .ngReactGrid h1, .ngReactGrid .ngReactGridHeaderWrapper {
-    background: #ffffff; /* Old browsers */
-    background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%, #7db9e8 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#eeeeee), color-stop(100%,#7db9e8)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* IE10+ */
-    background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
+.ngReactGrid table tr td:last-child,
+.ngReactGrid table tr th:last-child {
+    border-right: 0px;
 }
 
 .ngReactGrid .ngReactGridFooter {
-    border: 1px solid #CCC;
     padding: 5px;
     font-size: 11px;
     overflow: auto;
+    border: 1px solid #ddd;
 }
 
 .icon-arrows {
@@ -169,11 +164,9 @@
     margin-top: 1px;
     line-height: 14px;
     vertical-align: text-top;
-    background-image: url("../img/glyphicons-halflings.png");
-    background-repeat: no-repeat;
     background-image: url('../img/arrow_icons.png');
     background-repeat: no-repeat;
-    width: 7px;
+    width: 9px;
     height: 10px;
 }
 
@@ -190,14 +183,18 @@
 }
 
 .ngReactGrid .ngReactGridStatus {
-    float: left;
-    width: 50%;
+    width: 33%;
     padding-top: 4px;
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 5px;
 }
 
 .ngReactGrid .ngReactGridPagination {
-    float: left;
-    width: 50%;
+    width: 34%;
+    display: inline-block;
+    vertical-align: middle;
+    /* float: right; */
 }
 
 .ngReactGridPagination ul {
@@ -212,24 +209,12 @@
     display: inline;
 }
 
-.ngReactGridPagination ul li:hover a {
-    background: #EEE;
-}
-
-.ngReactGridPagination ul li.active a {
-    background: #428bca;
-    color: #FFF;
-}
-
 .ngReactGridPagination ul li a {
     position: relative;
     float: left;
-    padding: 3px 9px;
+    padding: 3px 6px;
     line-height: 1.42857143;
     text-decoration: none;
-    color: #428bca;
-    background-color: #fff;
-    border: 1px solid #ddd;
     margin-left: -1px;
     font-size:11px;
 }
