@@ -14,7 +14,7 @@ var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getDa
 var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.columnDefs = scope.grid.columnDefs || [];
     this.data = [];
-    this.height = 400;
+    this.height = 500;
     this.localMode = true;
     this.editing = false;
     this.singleLineCell = false;
@@ -25,7 +25,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.pageSize = 25;
     this.pageSizes = [25, 50, 100, 500];
     this.sortInfo = {field: "", dir: ""};
-    this.showGridSearch = true;
+    this.showGridSearch = false;
     this.showGridShowPerPage = true;
     this.search = "";
     this.horizontalScroll = false;
@@ -220,8 +220,13 @@ NgReactGrid.prototype.initWatchers = function () {
         }
     }.bind(this));
 
+    this.scope.$watch("grid.search", function (newValue, oldValue) {
+        if (newValue !== oldValue)
+            this.react.setSearch(newValue);
+    }.bind(this));
+
     this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
-        if (newValue && newValue != oldValue ) {
+        if (newValue && newValue !== oldValue) {
             this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));

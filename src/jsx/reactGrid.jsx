@@ -171,28 +171,6 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        var ngReactGridShowPerPage = React.createClass({
-            handleChange: function() {
-                this.props.grid.react.setPageSize(this.refs.showPerPage.getDOMNode().value);
-            },
-            render: function() {
-
-                var options = this.props.grid.pageSizes.map(function(pageSize, key) {
-                    return (<option value={pageSize} key={key}>{pageSize}</option>)
-                }.bind(this));
-
-                if (this.props.grid.showGridShowPerPage) {
-                  return (
-                      <div className="ngReactGridShowPerPage">
-                          Show <select onChange={this.handleChange} ref="showPerPage" value={this.props.grid.pageSize}>{options}</select> entries
-                      </div>
-                  )
-                } else {
-                  return (<div/>)
-                }
-            }
-        });
-
         var ngReactGridSearch = React.createClass({
             handleSearch: function() {
                 this.props.grid.react.setSearch(this.refs.searchField.getDOMNode().value);
@@ -230,7 +208,6 @@ var ngReactGridComponent = (function() {
                 return (
                     <div>
                         <div className="ngReactGridHeaderToolbarWrapper">
-                            <ngReactGridShowPerPage grid={this.props.grid} setGridState={this.props.setGridState} />
                             <ngReactGridSearch grid={this.props.grid} />
                         </div>
                         <div className="ngReactGridHeaderWrapper">
@@ -258,16 +235,24 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({
             cell: function(cellText, cellStyle) {
-                cellTextType = typeof cellText;
+                var cellTextType    = typeof cellText,
+                    self            = this;
+
+                cellStyle           = Object.create( cellStyle );
+
+                if( this.props.cell.style )
+                    Object.keys( this.props.cell.style ).map( function (prop){
+                        cellStyle[prop] = self.props.cell.style[prop];
+                    });
 
                 if(cellTextType === 'string') {
-                    return (<td style={cellStyle}>{cellText}</td>)
+                    return (<td style={cellStyle} className={this.props.cell.className}>{cellText}</td>)
                 } else if(cellTextType === 'object') {
 
                     cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
 
                     return (
-                        <td style={cellStyle}>
+                        <td style={cellStyle} className={this.props.cell.className}>
                             {cellText}
                         </td>
                     );
@@ -377,7 +362,7 @@ var ngReactGridComponent = (function() {
                     return <ngReactGridBodyRow key={index} row={row} columns={this.props.columnDefs} grid={this.props.grid} />
                 }.bind(this);
 
-                var rows;
+                var rows,total;
 
                 if(this.props.grid.react.loading) {
 
@@ -411,6 +396,11 @@ var ngReactGridComponent = (function() {
                                 </td>
                             </tr>
                         )
+                    } else {
+                        if( this.props.grid.total ){
+                            total = rows.pop();
+                            total.props.row.isTotal = true;
+                        }
                     }
                 }
 
@@ -428,6 +418,15 @@ var ngReactGridComponent = (function() {
                     tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
                 }
 
+                if( total )
+                    total = (
+                        <table className="total-row" style={tableStyle}>
+                            <tbody>
+                                {total}
+                            </tbody>
+                        </table>
+                    );
+
                 return (
                     <div className="ngReactGridBody">
                         <div className="ngReactGridViewPort" style={ngReactGridViewPortStyle}>
@@ -439,6 +438,7 @@ var ngReactGridComponent = (function() {
                                 </table>
                             </div>
                         </div>
+                        {total}
                     </div>
                 );
             }
@@ -457,6 +457,28 @@ var ngReactGridComponent = (function() {
                         <div>Page <strong>{this.props.grid.currentPage}</strong> of <strong>{this.props.grid.totalPages}</strong> - Showing <strong>{this.props.grid.react.showingRecords}</strong> of <strong>{this.props.grid.totalCount}</strong> records</div>
                     </div>
                 )
+            }
+        });
+
+        var ngReactGridShowPerPage = React.createClass({
+            handleChange: function() {
+                this.props.grid.react.setPageSize(this.refs.showPerPage.getDOMNode().value);
+            },
+            render: function() {
+
+                var options = this.props.grid.pageSizes.map(function(pageSize, key) {
+                    return (<option value={pageSize} key={key}>{pageSize}</option>)
+                }.bind(this));
+
+                if (this.props.grid.showGridShowPerPage) {
+                    return (
+                        <div className="ngReactGridShowPerPage">
+                        Show <select onChange={this.handleChange} ref="showPerPage" value={this.props.grid.pageSize}>{options}</select> entries
+                        </div>
+                    )
+                } else {
+                    return (<div/>)
+                }
             }
         });
 
@@ -505,11 +527,11 @@ var ngReactGridComponent = (function() {
                 return (
                     <div className="ngReactGridPagination">
                         <ul>
-                            <li><a href="javascript:" onClick={this.goToPrevPage}>Prev</a></li>
                             <li><a href="javascript:" onClick={this.goToFirstPage}>First</a></li>
+                            <li><a href="javascript:" onClick={this.goToPrevPage}>Prev</a></li>
                             {pages}
-                            <li><a href="javascript:" onClick={this.goToLastPage}>Last</a></li>
                             <li><a href="javascript:" onClick={this.goToNextPage}>Next</a></li>
+                            <li><a href="javascript:" onClick={this.goToLastPage}>Last</a></li>
                         </ul>
                     </div>
                 )
@@ -521,6 +543,7 @@ var ngReactGridComponent = (function() {
                 return (
                     <div className="ngReactGridFooter">
                         <ngReactGridStatus grid={this.props.grid} />
+                        <ngReactGridShowPerPage grid={this.props.grid} setGridState={this.props.setGridState} />
                         <ngReactGridPagination grid={this.props.grid} />
                     </div>
                 )

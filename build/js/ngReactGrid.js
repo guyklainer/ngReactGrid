@@ -172,28 +172,6 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        var ngReactGridShowPerPage = React.createClass({displayName: 'ngReactGridShowPerPage',
-            handleChange: function() {
-                this.props.grid.react.setPageSize(this.refs.showPerPage.getDOMNode().value);
-            },
-            render: function() {
-
-                var options = this.props.grid.pageSizes.map(function(pageSize, key) {
-                    return (React.DOM.option( {value:pageSize, key:key}, pageSize))
-                }.bind(this));
-
-                if (this.props.grid.showGridShowPerPage) {
-                  return (
-                      React.DOM.div( {className:"ngReactGridShowPerPage"}, 
-                          "Show ", React.DOM.select( {onChange:this.handleChange, ref:"showPerPage", value:this.props.grid.pageSize}, options), " entries"
-                      )
-                  )
-                } else {
-                  return (React.DOM.div(null))
-                }
-            }
-        });
-
         var ngReactGridSearch = React.createClass({displayName: 'ngReactGridSearch',
             handleSearch: function() {
                 this.props.grid.react.setSearch(this.refs.searchField.getDOMNode().value);
@@ -231,7 +209,6 @@ var ngReactGridComponent = (function() {
                 return (
                     React.DOM.div(null, 
                         React.DOM.div( {className:"ngReactGridHeaderToolbarWrapper"}, 
-                            ngReactGridShowPerPage( {grid:this.props.grid, setGridState:this.props.setGridState} ),
                             ngReactGridSearch( {grid:this.props.grid} )
                         ),
                         React.DOM.div( {className:"ngReactGridHeaderWrapper"}, 
@@ -259,16 +236,24 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({displayName: 'ngReactGridBodyRowCell',
             cell: function(cellText, cellStyle) {
-                cellTextType = typeof cellText;
+                var cellTextType    = typeof cellText,
+                    self            = this;
+
+                cellStyle           = Object.create( cellStyle );
+
+                if( this.props.cell.style )
+                    Object.keys( this.props.cell.style ).map( function (prop){
+                        cellStyle[prop] = self.props.cell.style[prop];
+                    });
 
                 if(cellTextType === 'string') {
-                    return (React.DOM.td( {style:cellStyle}, cellText))
+                    return (React.DOM.td( {style:cellStyle, className:this.props.cell.className}, cellText))
                 } else if(cellTextType === 'object') {
 
                     cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
 
                     return (
-                        React.DOM.td( {style:cellStyle}, 
+                        React.DOM.td( {style:cellStyle, className:this.props.cell.className}, 
                             cellText
                         )
                     );
@@ -378,7 +363,7 @@ var ngReactGridComponent = (function() {
                     return ngReactGridBodyRow( {key:index, row:row, columns:this.props.columnDefs, grid:this.props.grid} )
                 }.bind(this);
 
-                var rows;
+                var rows,total;
 
                 if(this.props.grid.react.loading) {
 
@@ -412,6 +397,11 @@ var ngReactGridComponent = (function() {
                                 )
                             )
                         )
+                    } else {
+                        if( this.props.grid.total ){
+                            total = rows.pop();
+                            total.props.row.isTotal = true;
+                        }
                     }
                 }
 
@@ -429,6 +419,15 @@ var ngReactGridComponent = (function() {
                     tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
                 }
 
+                if( total )
+                    total = (
+                        React.DOM.table( {className:"total-row", style:tableStyle}, 
+                            React.DOM.tbody(null, 
+                                total
+                            )
+                        )
+                    );
+
                 return (
                     React.DOM.div( {className:"ngReactGridBody"}, 
                         React.DOM.div( {className:"ngReactGridViewPort", style:ngReactGridViewPortStyle}, 
@@ -439,7 +438,8 @@ var ngReactGridComponent = (function() {
                                     )
                                 )
                             )
-                        )
+                        ),
+                        total
                     )
                 );
             }
@@ -458,6 +458,28 @@ var ngReactGridComponent = (function() {
                         React.DOM.div(null, "Page ", React.DOM.strong(null, this.props.grid.currentPage), " of ", React.DOM.strong(null, this.props.grid.totalPages), " - Showing ", React.DOM.strong(null, this.props.grid.react.showingRecords), " of ", React.DOM.strong(null, this.props.grid.totalCount), " records")
                     )
                 )
+            }
+        });
+
+        var ngReactGridShowPerPage = React.createClass({displayName: 'ngReactGridShowPerPage',
+            handleChange: function() {
+                this.props.grid.react.setPageSize(this.refs.showPerPage.getDOMNode().value);
+            },
+            render: function() {
+
+                var options = this.props.grid.pageSizes.map(function(pageSize, key) {
+                    return (React.DOM.option( {value:pageSize, key:key}, pageSize))
+                }.bind(this));
+
+                if (this.props.grid.showGridShowPerPage) {
+                    return (
+                        React.DOM.div( {className:"ngReactGridShowPerPage"}, 
+                        "Show ", React.DOM.select( {onChange:this.handleChange, ref:"showPerPage", value:this.props.grid.pageSize}, options), " entries"
+                        )
+                    )
+                } else {
+                    return (React.DOM.div(null))
+                }
             }
         });
 
@@ -506,11 +528,11 @@ var ngReactGridComponent = (function() {
                 return (
                     React.DOM.div( {className:"ngReactGridPagination"}, 
                         React.DOM.ul(null, 
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToPrevPage}, "Prev")),
                             React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToFirstPage}, "First")),
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToPrevPage}, "Prev")),
                             pages,
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToLastPage}, "Last")),
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToNextPage}, "Next"))
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToNextPage}, "Next")),
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToLastPage}, "Last"))
                         )
                     )
                 )
@@ -522,6 +544,7 @@ var ngReactGridComponent = (function() {
                 return (
                     React.DOM.div( {className:"ngReactGridFooter"}, 
                         ngReactGridStatus( {grid:this.props.grid} ),
+                        ngReactGridShowPerPage( {grid:this.props.grid, setGridState:this.props.setGridState} ),
                         ngReactGridPagination( {grid:this.props.grid} )
                     )
                 )
@@ -747,7 +770,7 @@ var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getDa
 var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.columnDefs = scope.grid.columnDefs || [];
     this.data = [];
-    this.height = 400;
+    this.height = 500;
     this.localMode = true;
     this.editing = false;
     this.singleLineCell = false;
@@ -758,7 +781,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.pageSize = 25;
     this.pageSizes = [25, 50, 100, 500];
     this.sortInfo = {field: "", dir: ""};
-    this.showGridSearch = true;
+    this.showGridSearch = false;
     this.showGridShowPerPage = true;
     this.search = "";
     this.horizontalScroll = false;
@@ -953,8 +976,13 @@ NgReactGrid.prototype.initWatchers = function () {
         }
     }.bind(this));
 
+    this.scope.$watch("grid.search", function (newValue, oldValue) {
+        if (newValue !== oldValue)
+            this.react.setSearch(newValue);
+    }.bind(this));
+
     this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
-        if (newValue && newValue != oldValue ) {
+        if (newValue && newValue !== oldValue) {
             this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));
@@ -1099,7 +1127,6 @@ NgReactGrid.prototype.updateTotalCount = function (updates) {
  * @param updates
  */
 NgReactGrid.prototype.updateColumns = function (updates) {
-    console.log("SDF");
     this.columnDefs = updates.columnDefs;
 };
 
@@ -1603,7 +1630,7 @@ var _ = require('../vendors/miniUnderscore');
 var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
 var ngReactGridCheckboxFactory = function($rootScope) {
-    var ngReactGridCheckbox = function(selectionTarget, options) {
+    var ngReactGridCheckbox = function(selectionTarget, options, render) {
         var defaultOptions = {
             disableCheckboxField: '',
             hideDisabledCheckboxField: false,
@@ -1640,6 +1667,13 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 });
             },
             render: function(row) {
+                if( render ){
+                    var customRender = render( row );
+
+                    if( customRender )
+                        return customRender;
+                }
+
                 var handleClick = function() {
                     // Sends event to uncheck header 'batch toggle' checkbox
                     window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxHeaderStateFromEvent", {detail: {checked: false}}));

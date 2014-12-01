@@ -2,7 +2,7 @@ var _ = require('../vendors/miniUnderscore');
 var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
 var ngReactGridCheckboxFactory = function($rootScope) {
-    var ngReactGridCheckbox = function(selectionTarget, options) {
+    var ngReactGridCheckbox = function(selectionTarget, options, render) {
         var defaultOptions = {
             disableCheckboxField: '',
             hideDisabledCheckboxField: false,
@@ -39,6 +39,13 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 });
             },
             render: function(row) {
+                if( render ){
+                    var customRender = render( row );
+
+                    if( customRender )
+                        return customRender;
+                }
+
                 var handleClick = function() {
                     // Sends event to uncheck header 'batch toggle' checkbox
                     window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxHeaderStateFromEvent", {detail: {checked: false}}));
